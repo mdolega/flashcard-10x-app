@@ -8,6 +8,10 @@
     "baseUrl": ".",
     "paths": {
       "@/*": ["./src/*"]
-    }
+    },
+    "sourceMap": true,
+    "inlineSourceMap": false,
+    "declaration": true,
+    "declarationMap": true
   }
 }

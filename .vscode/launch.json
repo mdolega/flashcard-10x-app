@@ -2,10 +2,77 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "command": "./node_modules/.bin/astro dev",
-      "name": "Development server",
+      "name": "🚀 Astro Dev Server",
+      "type": "node-terminal",
       "request": "launch",
-      "type": "node-terminal"
+      "command": "npm run dev",
+      "cwd": "${workspaceFolder}",
+      "env": {
+        "NODE_ENV": "development"
+      },
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "new"
+      }
+    },
+    {
+      "name": "🔧 Astro Dev (Node Debug)",
+      "type": "node",
+      "request": "launch",
+      "program": "${workspaceFolder}/node_modules/.bin/astro",
+      "args": ["dev", "--host", "0.0.0.0"],
+      "cwd": "${workspaceFolder}",
+      "env": {
+        "NODE_ENV": "development",
+        "NODE_OPTIONS": "--enable-source-maps"
+      },
+      "console": "integratedTerminal",
+      "internalConsoleOptions": "neverOpen",
+      "sourceMaps": true,
+      "outFiles": [
+        "${workspaceFolder}/dist/**/*.js",
+        "${workspaceFolder}/.astro/**/*.js",
+        "${workspaceFolder}/src/**/*.ts",
+        "${workspaceFolder}/src/**/*.tsx"
+      ],
+      "skipFiles": [
+        "<node_internals>/**",
+        "${workspaceFolder}/node_modules/**"
+      ],
+      "resolveSourceMapLocations": [
+        "${workspaceFolder}/**",
+        "!**/node_modules/**"
+      ]
+    },
+    {
+      "name": "🌐 Astro Dev (Chrome Debug)",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:3000",
+      "webRoot": "${workspaceFolder}/src",
+      "sourceMapPathOverrides": {
+        "/*": "${workspaceFolder}/src/*"
+      },
+      "preLaunchTask": "astro-dev"
+    },
+    {
+      "name": "🏗️ Astro Build",
+      "type": "node-terminal",
+      "request": "launch",
+      "command": "npm run build",
+      "cwd": "${workspaceFolder}",
+      "env": {
+        "NODE_ENV": "production"
+      }
+    },
+    {
+      "name": "👀 Astro Preview",
+      "type": "node-terminal",
+      "request": "launch",
+      "command": "npm run preview",
+      "cwd": "${workspaceFolder}",
     }
   ]
 }

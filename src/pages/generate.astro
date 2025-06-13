@@ -1,0 +1,17 @@
+---
+import Layout from "../layouts/Layout.astro";
+import GenerateView from "../components/GenerateView";
+---
+
+<Layout title="Generuj fiszki - 10x Flashcards">
+  <main class="min-h-screen bg-gray-50 py-8">
+    <div class="container mx-auto px-4 max-w-4xl">
+      <header class="mb-8 text-center">
+        <h1 class="text-3xl font-bold text-gray-900 mb-2">Generuj fiszki z AI</h1>
+        <p class="text-gray-600">Wklej tekst źródłowy i pozwól AI wygenerować fiszki do nauki</p>
+      </header>
+
+      <GenerateView client:load />
+    </div>
+  </main>
+</Layout>

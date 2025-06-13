@@ -1,94 +1,146 @@
-# 10x Astro Starter
+# Flashcards AI  
+*(Fiszki AI)*
 
-A modern, opinionated starter template for building fast, accessible, and AI-friendly web applications.
+A web application for AI-assisted generation, creation, and management of educational flashcards, with integrated spaced-repetition scheduling (SM-2), Markdown support, and user authentication.
+
+---
+
+## Table of Contents
+
+1. [Tech Stack](#tech-stack)  
+2. [Getting Started Locally](#getting-started-locally)  
+3. [Available Scripts](#available-scripts)  
+4. [Project Scope](#project-scope)  
+5. [Project Status](#project-status)  
+6. [License](#license)  
+
+---
 
 ## Tech Stack
 
-- [Astro](https://astro.build/) v5.5.5 - Modern web framework for building fast, content-focused websites
-- [React](https://react.dev/) v19.0.0 - UI library for building interactive components
-- [TypeScript](https://www.typescriptlang.org/) v5 - Type-safe JavaScript
-- [Tailwind CSS](https://tailwindcss.com/) v4.0.17 - Utility-first CSS framework
+- **Frontend**  
+  - Astro 5 & React 19  
+  - TypeScript 5  
+  - Tailwind 4  
+  - Shadcn/ui  
+- **Backend**  
+  - Supabase (PostgreSQL + `@supabase/supabase-js`)  
+- **AI Integration**  
+  - Openrouter.ai (configurable model selection)  
+- **CI/CD & Hosting**  
+  - GitHub Actions  
+  - Docker on DigitalOcean  
+- **Runtime**  
+  - Node.js v22.14.0 (managed via `.nvmrc`)
 
-## Prerequisites
+---
 
-- Node.js v22.14.0 (as specified in `.nvmrc`)
-- npm (comes with Node.js)
+## Getting Started Locally
 
-## Getting Started
+### Prerequisites
 
-1. Clone the repository:
+- [Node.js](https://nodejs.org/) v22.14.0 (use nvm: `nvm use`)  
+- A Supabase project with credentials:  
+  - `SUPABASE_URL`  
+  - `SUPABASE_KEY`  
+- An Openrouter.ai API key: `OPENROUTER_API_KEY`  
+- (Optional) Environment settings:  
+  - `MAX_FLASHCARDS` (default: 20)  
+  - `RETRY_ATTEMPTS` for AI calls  
+- Create a `.env` file in the project root:
+
+  ```bash
+  SUPABASE_URL=<your_supabase_url>
+  SUPABASE_KEY=<your_supabase_anon_key>
+  OPENROUTER_API_KEY=<your_openrouter_api_key>
+  MAX_FLASHCARDS=20
+  RETRY_ATTEMPTS=3
+  ```
+
+### Installation & Run
 
 ```bash
-git clone https://github.com/przeprogramowani/10x-astro-starter.git
-cd 10x-astro-starter
-```
-
-2. Install dependencies:
-
-```bash
+git clone https://github.com/<your-username>/flashcard-10x-app.git
+cd flashcard-10x-app
 npm install
-```
-
-3. Run the development server:
-
-```bash
 npm run dev
 ```
 
-4. Build for production:
+Open `http://localhost:3000` in your browser.
 
-```bash
-npm run build
-```
+---
 
 ## Available Scripts
 
-- `npm run dev` - Start development server
-- `npm run build` - Build for production
-- `npm run preview` - Preview production build
-- `npm run lint` - Run ESLint
-- `npm run lint:fix` - Fix ESLint issues
+- `npm run dev`  
+  Start Astro development server with live reload.
 
-## Project Structure
+- `npm run build`  
+  Build the production site to `dist/`.
 
-```md
-.
-├── src/
-│   ├── layouts/    # Astro layouts
-│   ├── pages/      # Astro pages
-│   │   └── api/    # API endpoints
-│   ├── components/ # UI components (Astro & React)
-│   └── assets/     # Static assets
-├── public/         # Public assets
-```
+- `npm run preview`  
+  Preview the production build locally.
 
-## AI Development Support
+- `npm run astro`  
+  Run Astro CLI.
 
-This project is configured with AI development tools to enhance the development experience, providing guidelines for:
+- `npm run lint`  
+  Run ESLint on all `.ts`, `.tsx`, and `.astro` files.
 
-- Project structure
-- Coding practices
-- Frontend development
-- Styling with Tailwind
-- Accessibility best practices
-- Astro and React guidelines
+- `npm run lint:fix`  
+  Auto-fix lint errors.
 
-### Cursor IDE
+- `npm run format`  
+  Format files with Prettier.
 
-The project includes AI rules in `.cursor/rules/` directory that help Cursor IDE understand the project structure and provide better code suggestions.
+---
 
-### GitHub Copilot
+## Project Scope
 
-AI instructions for GitHub Copilot are available in `.github/copilot-instructions.md`
+### Core Features
 
-### Windsurf
+- **User Authentication**  
+  - Register, login (email/password)  
+  - JWT-based auth, change password, delete account  
 
-The `.windsurfrules` file contains AI configuration for Windsurf.
+- **AI-Powered Flashcard Generation**  
+  - Input text (500–10 000 chars), choose 1–20 cards  
+  - Receive Markdown-formatted Q&A pairs  
 
-## Contributing
+- **Manual Flashcard CRUD**  
+  - Create, edit (Markdown), delete flashcards  
+  - Status transitions (e.g. “edited”)  
 
-Please follow the AI guidelines and coding practices defined in the AI configuration files when contributing to this project.
+- **Flashcard Management**  
+  - List and filter by status & difficulty  
+  - Accept or reject AI-generated cards  
+
+- **SRS Scheduling**  
+  - SM-2 algorithm integration for review scheduling  
+
+- **Additional**  
+  - Difficulty tagging (easy/medium/hard)  
+  - Detailed AI prompt logging  
+
+### Boundaries (MVP)
+
+- No file imports (PDF, DOCX)  
+- No sharing between users  
+- No mobile app  
+- No undo or bulk restore  
+- No email-based password reset  
+- Basic SRS only (no custom algorithm)
+
+---
+
+## Project Status
+
+🚧 **In Development (MVP)**  
+This project is under active development. Core features are being built and tested. Contributions and feedback are welcome!
+
+---
 
 ## License
 
-MIT
+**No license specified.**  
+Please add a `LICENSE` file to this repository to define usage and distribution terms.
