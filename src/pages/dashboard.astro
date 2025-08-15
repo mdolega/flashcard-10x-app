@@ -1,0 +1,95 @@
+---
+import GlobalLayout from "../layouts/GlobalLayout.astro";
+
+// Server-side auth check
+const isAuthenticated = Astro.cookies.has("sb-access-token");
+
+if (!isAuthenticated) {
+  return Astro.redirect("/auth?mode=login");
+}
+---
+
+<GlobalLayout title="Dashboard - Fiszki AI">
+  <div class="space-y-6">
+    <div class="bg-white shadow-sm rounded-lg p-6">
+      <h1 class="text-2xl font-bold text-gray-900 mb-4">Witaj w Fiszki AI!</h1>
+      <p class="text-gray-600 mb-6">Centralny panel do zarządzania swoimi fiszkami i śledzenia postępów w nauce.</p>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <a
+          href="/flashcards"
+          class="block p-6 bg-blue-50 rounded-lg border border-blue-200 hover:bg-blue-100 transition-colors"
+        >
+          <div class="flex items-center mb-4">
+            <svg class="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"
+              ></path>
+            </svg>
+            <h3 class="text-lg font-semibold text-gray-900 ml-3">Przeglądaj fiszki</h3>
+          </div>
+          <p class="text-gray-600">Zobacz wszystkie swoje fiszki, zarządzaj nimi i śledź postępy</p>
+        </a>
+
+        <a
+          href="/generate"
+          class="block p-6 bg-green-50 rounded-lg border border-green-200 hover:bg-green-100 transition-colors"
+        >
+          <div class="flex items-center mb-4">
+            <svg class="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"
+              ></path>
+            </svg>
+            <h3 class="text-lg font-semibold text-gray-900 ml-3">Generuj fiszki</h3>
+          </div>
+          <p class="text-gray-600">Utwórz nowe fiszki przy pomocy sztucznej inteligencji</p>
+        </a>
+
+        <a
+          href="/review"
+          class="block p-6 bg-purple-50 rounded-lg border border-purple-200 hover:bg-purple-100 transition-colors"
+        >
+          <div class="flex items-center mb-4">
+            <svg class="w-8 h-8 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+              ></path>
+            </svg>
+            <h3 class="text-lg font-semibold text-gray-900 ml-3">Powtórki</h3>
+          </div>
+          <p class="text-gray-600">Rozpocznij sesję powtórek zgodnie z algorytmem SRS</p>
+        </a>
+      </div>
+    </div>
+
+    <div class="bg-white shadow-sm rounded-lg p-6">
+      <h2 class="text-xl font-semibold text-gray-900 mb-4">Szybkie akcje</h2>
+      <div class="flex flex-wrap gap-4">
+        <a
+          href="/flashcards"
+          class="bg-blue-600 text-white px-6 py-2 rounded-md text-sm font-medium hover:bg-blue-700 transition-colors"
+        >
+          Zobacz wszystkie fiszki
+        </a>
+        <a
+          href="/generate"
+          class="bg-green-600 text-white px-6 py-2 rounded-md text-sm font-medium hover:bg-green-700 transition-colors"
+        >
+          Generuj nowe fiszki
+        </a>
+        <a
+          href="/settings"
+          class="bg-gray-600 text-white px-6 py-2 rounded-md text-sm font-medium hover:bg-gray-700 transition-colors"
+        >
+          Ustawienia
+        </a>
+      </div>
+    </div>
+  </div>
+</GlobalLayout>

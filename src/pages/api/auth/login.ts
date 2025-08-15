@@ -1,6 +1,6 @@
 import type { APIRoute } from "astro";
 import { z } from "zod";
-import type { LoginDTO } from "../../../types/auth.types";
+import type { LoginDTO } from "../../../types";
 
 // Validation schema
 const loginSchema = z.object({

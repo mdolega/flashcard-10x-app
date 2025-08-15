@@ -1,5 +1,3 @@
-<mermaid_diagram>
-
 ```mermaid
 flowchart TD
   subgraph "Layouts"
@@ -14,6 +12,8 @@ flowchart TD
     RRPT["/reset-password/[token]<br/>reset-password/[token].astro"]
     CP["/change-password<br/>change-password.astro"]
     FP["/flashcards<br/>flashcards.astro"]
+    RV["/review<br/>review.astro"]
+    ST["/settings<br/>settings.astro"]
   end
 
   subgraph "React Components"
@@ -24,6 +24,9 @@ flowchart TD
     CPF[ChangePasswordForm]
     GF[GenerateForm]
     FL[FlashcardList]
+    RC[ReviewCard]
+    RCTL[ReviewControls]
+    RPR[ReviewProgress]
   end
 
   subgraph "API Endpoints"
@@ -32,6 +35,8 @@ flowchart TD
     API_PWReset["POST /api/auth/password-reset"]
     API_PWUpdate["POST /api/auth/password-update"]
     API_ChgPW["POST /api/auth/change-password"]
+    API_RevList["GET /api/flashcards/review"]
+    API_RevGrade["POST /api/flashcards/review/{id}/grade"]
   end
 
   LP --> AL
@@ -40,6 +45,8 @@ flowchart TD
   RRPT --> AL
   CP --> ML
   FP --> ML
+  RV --> ML
+  ST --> ML
 
   AL --> LF
   AL --> RF
@@ -48,12 +55,15 @@ flowchart TD
   ML --> CPF
   ML --> GF
   ML --> FL
+  ML --> RC
+  ML --> RCTL
+  ML --> RPR
 
   LF --> API_Login
   RF --> API_Register
   PRF --> API_PWReset
   PTF --> API_PWUpdate
   CPF --> API_ChgPW
+  RC --> API_RevList
+  RCTL --> API_RevGrade
 ```  
-
-</mermaid_diagram> 

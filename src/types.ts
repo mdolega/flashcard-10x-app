@@ -9,6 +9,43 @@ type FlashcardInsert = TablesInsert<"flashcards">;
 type FlashcardUpdate = TablesUpdate<"flashcards">;
 type AiLogRow = Tables<"ai_generations_logs">;
 
+//----------------------
+// Auth Types (simplified from auth.types.ts)
+//----------------------
+export interface RegisterDTO {
+  email: string;
+  password: string;
+}
+
+export interface LoginDTO {
+  email: string;
+  password: string;
+}
+
+export interface ChangePasswordDTO {
+  currentPassword: string;
+  newPassword: string;
+}
+
+export interface ResetPasswordDTO {
+  email: string;
+}
+
+export interface UpdatePasswordDTO {
+  token: string;
+  newPassword: string;
+}
+
+export interface AuthResponse {
+  user: Record<string, unknown>;
+  session: Record<string, unknown>;
+}
+
+export interface ErrorResponse {
+  status: number;
+  message: string;
+}
+
 // Domain-specific enums and unions
 /** Difficulty levels for flashcards */
 export type Difficulty = "easy" | "medium" | "hard";
@@ -126,11 +163,26 @@ export interface GenerateFormData {
 export interface FlashcardReviewDto {
   id: FlashcardDto["id"];
   question: FlashcardDto["question"];
+  answer: FlashcardDto["answer"];
   next_review: string; // ISO timestamp
 }
 
 /** Response wrapper for GET /flashcards/review */
 export type FlashcardReviewListResponseDto = ListResponse<FlashcardReviewDto>;
+
+export type ReviewGrade = 0 | 1 | 2 | 3 | 4 | 5;
+
+export interface ReviewGradeCommand {
+  grade: ReviewGrade;
+}
+
+export interface ReviewResultDto {
+  id: string;
+  next_review: string;
+  repetition: number;
+  interval_days: number;
+  easiness: number;
+}
 
 //----------------------
 // AI Generation Logs

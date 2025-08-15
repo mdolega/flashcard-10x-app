@@ -10,9 +10,10 @@ A web application for AI-assisted generation, creation, and management of educat
 1. [Tech Stack](#tech-stack)  
 2. [Getting Started Locally](#getting-started-locally)  
 3. [Available Scripts](#available-scripts)  
-4. [Project Scope](#project-scope)  
-5. [Project Status](#project-status)  
-6. [License](#license)  
+4. [Testing](#testing)  
+5. [Project Scope](#project-scope)  
+6. [Project Status](#project-status)  
+7. [License](#license)  
 
 ---
 
@@ -92,6 +93,47 @@ Open `http://localhost:3000` in your browser.
 
 - `npm run format`  
   Format files with Prettier.
+
+---
+
+## Testing
+
+This project follows a multi-layer testing strategy. See the full plan in `.ai/test-plan.md`.
+
+- **Unit Testing**: business logic, schema validation, utilities, and React components
+  - Tools: `vitest`, `@testing-library/react`, `@testing-library/jest-dom`, `@vitejs/plugin-react`, `happy-dom`/`jsdom`, `vitest-mock-extended`, `zod-mock`
+- **Integration Testing**: module interactions and external services
+  - Tools: `MSW` (network mocking), `@supabase/supabase-js` mocks, Supabase Local, `Testcontainers`, `Nock`, `@astrojs/test-utils`
+- **Functional/E2E Testing**: end-to-end user flows and requirements
+  - Tools: `Playwright`, `Cucumber`
+- **Coverage**: `v8`/`c8`
+
+Example Vitest config (planned):
+
+```ts
+// vitest.config.ts
+import { defineConfig } from 'vitest/config'
+import react from '@vitejs/plugin-react'
+import { getViteConfig } from 'astro/config'
+
+export default defineConfig(
+  getViteConfig({
+    plugins: [react()],
+    test: {
+      globals: true,
+      environment: 'happy-dom',
+      setupFiles: ['./src/test/setup.ts'],
+      coverage: {
+        provider: 'v8',
+        reporter: ['text', 'json', 'html'],
+        exclude: ['node_modules/', 'src/test/']
+      }
+    }
+  })
+)
+```
+
+Note: Testing tooling and scripts are being introduced incrementally. Refer to the plan in `.ai/test-plan.md` before adding new tests.
 
 ---
 

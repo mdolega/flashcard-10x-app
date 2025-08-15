@@ -1,0 +1,49 @@
+---
+import GlobalLayout from "../layouts/GlobalLayout.astro";
+import AuthForm from "../components/auth/AuthForm";
+
+// Get mode from URL params or default to login
+const url = new URL(Astro.request.url);
+const mode = url.searchParams.get("mode") || "login";
+
+// Validate mode
+const validModes = ["login", "register", "reset", "update", "change"] as const;
+type AuthMode = (typeof validModes)[number];
+
+if (!validModes.includes(mode as AuthMode)) {
+  return Astro.redirect("/auth?mode=login");
+}
+
+const validatedMode = mode as AuthMode;
+
+// Check if user is authenticated for change password mode
+const isAuthenticated = Astro.cookies.has("sb-access-token");
+if (validatedMode === "change" && !isAuthenticated) {
+  return Astro.redirect("/auth?mode=login");
+}
+
+// Redirect authenticated users away from public auth modes
+if (isAuthenticated && ["login", "register", "reset", "update"].includes(validatedMode)) {
+  return Astro.redirect("/dashboard");
+}
+
+const titles: Record<AuthMode, string> = {
+  login: "Logowanie - Fiszki AI",
+  register: "Rejestracja - Fiszki AI",
+  reset: "Reset hasła - Fiszki AI",
+  update: "Nowe hasło - Fiszki AI",
+  change: "Zmiana hasła - Fiszki AI",
+};
+
+const descriptions: Record<AuthMode, string> = {
+  login: "Zaloguj się do swojego konta w Fiszki AI",
+  register: "Utwórz nowe konto w Fiszki AI",
+  reset: "Zresetuj hasło do swojego konta",
+  update: "Ustaw nowe hasło dla swojego konta",
+  change: "Zmień hasło swojego konta",
+};
+---
+
+<GlobalLayout title={titles[validatedMode]} description={descriptions[validatedMode]} isAuthPage={true}>
+  <AuthForm mode={validatedMode} client:only="react" />
+</GlobalLayout>

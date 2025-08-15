@@ -23,11 +23,11 @@ Aplikacja składa się z jednego globalnego layoutu (`GlobalLayout`), który zaw
   - Komponenty: `GenerateForm`, skeleton loader, retry button, toast error
   - UX/Dostępność/Bezpieczeństwo: aria-describedby, limitacja znaków, obsługa ładowania i błędów
 
-- **Lista fiszek**
+- **Dashboard (Lista fiszek)**
   - Ścieżka: `/flashcards`
-  - Cel: wyświetlenie i zarządzanie fiszkami użytkownika
-  - Kluczowe informacje: pytanie, status, poziom trudności, data utworzenia
-  - Komponenty: `FlashcardsTable` (TanStack Query, paginacja, skeleton), akcje: edit, delete, accept/reject
+  - Cel: ekran główny po zalogowaniu, wyświetlenie listy fiszek oraz podsumowania/statystyk
+  - Kluczowe informacje: liczbę fiszek, pytanie, odpowiedź, status, poziom trudności, data utworzenia
+  - Komponenty: `DashboardCard` (statystyki), `FlashcardsTable` (TanStack Query, paginacja, skeleton) z akcjami: edit, delete, accept/reject
   - UX/Dostępność/Bezpieczeństwo: focusable rows, aria-labels dla przycisków, confirmation modal dla usunięcia
 
 - **Modal edycji fiszki**
@@ -51,7 +51,7 @@ Aplikacja składa się z jednego globalnego layoutu (`GlobalLayout`), który zaw
 
 ## 3. Mapa podróży użytkownika
 
-1. Nowy użytkownik → `/auth` → rejestracja → JWT w `localStorage` → redirect → `/dashboard`
+1. Nowy użytkownik → `/auth` → rejestracja → JWT w `localStorage` → redirect → `/flashcards`
 2. Dashboard → klik „Generuj fiszki” → `/generate`
 3. Wklejenie tekstu/liczba → POST `/flashcards/generate` → toast success → redirect → `/flashcards`
 4. Lista fiszek → edycja/modal lub akceptacja/odrzucenie → aktualizacja tabeli

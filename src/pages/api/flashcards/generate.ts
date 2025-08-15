@@ -1,4 +1,5 @@
 import type { APIRoute } from "astro";
+import { ZodError } from "zod";
 import { FlashcardService } from "../../../lib/services/flashcard.service";
 import { flashcardGenerateSchema } from "../../../lib/schemas/flashcard.schema";
 
@@ -6,16 +7,26 @@ export const prerender = false;
 
 export const POST: APIRoute = async ({ request, locals }) => {
   try {
+    // Check authentication
+    const {
+      data: { user },
+      error: authError,
+    } = await locals.supabase.auth.getUser();
+
+    if (authError || !user) {
+      return new Response(JSON.stringify({ message: "Unauthorized" }), {
+        status: 401,
+        headers: { "Content-Type": "application/json" },
+      });
+    }
+
     // Parse and validate request body
     const body = await request.json();
     const validatedData = flashcardGenerateSchema.parse(body);
 
-    // Use default user ID for development
-    const userId = import.meta.env.DEFAULT_USER_ID;
-
     // Generate flashcards
     const flashcardService = new FlashcardService();
-    const result = await flashcardService.generateFromAI(validatedData.text, validatedData.count, userId);
+    const result = await flashcardService.generateFromAI(validatedData.text, validatedData.count, user.id);
 
     return new Response(JSON.stringify(result), {
       status: 201,
@@ -24,14 +35,16 @@ export const POST: APIRoute = async ({ request, locals }) => {
       },
     });
   } catch (error) {
-    // Handle validation errors
-    if (error instanceof Error) {
+    console.error("Error generating flashcards:", error);
+
+    if (error instanceof ZodError) {
       return new Response(
         JSON.stringify({
-          error: error.message,
+          message: "Validation failed",
+          errors: error.errors,
         }),
         {
-          status: error.name === "ZodError" ? 400 : 500,
+          status: 400,
           headers: {
             "Content-Type": "application/json",
           },
@@ -39,10 +52,9 @@ export const POST: APIRoute = async ({ request, locals }) => {
       );
     }
 
-    // Handle unknown errors
     return new Response(
       JSON.stringify({
-        error: "An unexpected error occurred",
+        message: "Internal server error",
       }),
       {
         status: 500,

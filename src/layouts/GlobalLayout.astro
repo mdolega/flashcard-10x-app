@@ -1,0 +1,253 @@
+---
+import "../styles/global.css";
+
+interface Props {
+  title: string;
+  description?: string;
+  isAuthPage?: boolean;
+}
+
+const { title, description = "Fiszki AI - Naucz się szybciej z wykorzystaniem sztucznej inteligencji", isAuthPage = false } = Astro.props;
+
+// Check if user is authenticated (simplified check - should be enhanced with proper session check)
+const isAuthenticated = Astro.cookies.has('sb-access-token');
+---
+
+<!doctype html>
+<html lang="pl" class="h-full">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="description" content={description} />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <title>{title}</title>
+  </head>
+  <body class="h-full bg-gray-50">
+    {isAuthPage ? (
+      <>
+        <!-- Simplified header for auth pages -->
+        <div class="min-h-full flex flex-col">
+          <header class="bg-white shadow-sm">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+              <div class="flex justify-between items-center py-4">
+                <div class="flex items-center">
+                  <a href="/" class="text-2xl font-bold text-blue-600">
+                    Fiszki AI
+                  </a>
+                </div>
+              </div>
+            </div>
+          </header>
+          
+          <main class="flex-1 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+            <div class="w-full max-w-md">
+              <slot />
+            </div>
+          </main>
+          
+          <footer class="bg-white border-t">
+            <div class="max-w-7xl mx-auto py-4 px-4 sm:px-6 lg:px-8">
+              <p class="text-center text-sm text-gray-500">
+                © 2024 Fiszki AI. Wszystkie prawa zastrzeżone.
+              </p>
+            </div>
+          </footer>
+        </div>
+      </>
+    ) : (
+      <>
+        <!-- Full layout with navigation for protected/main pages -->
+        <div class="min-h-full">
+          <!-- Desktop Navigation -->
+          <header class="bg-white shadow-sm lg:block hidden">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+              <div class="flex justify-between items-center py-4">
+                <div class="flex items-center space-x-8">
+                  <a href="/" class="text-2xl font-bold text-blue-600">
+                    Fiszki AI
+                  </a>
+                  {isAuthenticated && (
+                    <nav class="flex space-x-1" role="navigation" aria-label="Główna nawigacja">
+                      <a 
+                        href="/dashboard" 
+                        class="text-gray-700 hover:text-blue-600 hover:bg-blue-50 px-3 py-2 rounded-md text-sm font-medium transition-colors"
+                        aria-label="Przejdź do pulpitu"
+                      >
+                        Dashboard
+                      </a>
+                      <a 
+                        href="/generate" 
+                        class="text-gray-700 hover:text-blue-600 hover:bg-blue-50 px-3 py-2 rounded-md text-sm font-medium transition-colors"
+                        aria-label="Generuj nowe fiszki"
+                      >
+                        Generowanie
+                      </a>
+                      <a 
+                        href="/flashcards" 
+                        class="text-gray-700 hover:text-blue-600 hover:bg-blue-50 px-3 py-2 rounded-md text-sm font-medium transition-colors"
+                        aria-label="Przeglądaj swoje fiszki"
+                      >
+                        Fiszki
+                      </a>
+                      <a 
+                        href="/review" 
+                        class="text-gray-700 hover:text-blue-600 hover:bg-blue-50 px-3 py-2 rounded-md text-sm font-medium transition-colors"
+                        aria-label="Rozpocznij powtórki"
+                      >
+                        Powtórki
+                      </a>
+                      <a 
+                        href="/settings" 
+                        class="text-gray-700 hover:text-blue-600 hover:bg-blue-50 px-3 py-2 rounded-md text-sm font-medium transition-colors"
+                        aria-label="Ustawienia konta"
+                      >
+                        Ustawienia
+                      </a>
+                    </nav>
+                  )}
+                </div>
+                
+                <div class="flex items-center space-x-4">
+                  {isAuthenticated ? (
+                    <button 
+                      onclick="fetch('/api/auth/logout', { method: 'POST' }).then(() => window.location.href = '/auth?mode=login')"
+                      class="bg-red-600 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-red-700 transition-colors focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2"
+                      aria-label="Wyloguj się z aplikacji"
+                    >
+                      Wyloguj
+                    </button>
+                  ) : (
+                    <div class="flex items-center space-x-4">
+                      <a 
+                        href="/auth?mode=login" 
+                        class="text-gray-700 hover:text-blue-600 text-sm font-medium"
+                        aria-label="Zaloguj się"
+                      >
+                        Logowanie
+                      </a>
+                      <a 
+                        href="/auth?mode=register" 
+                        class="bg-blue-600 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-blue-700 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                        aria-label="Zarejestruj nowe konto"
+                      >
+                        Rejestracja
+                      </a>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          </header>
+          
+          <!-- Main Content -->
+          <main class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8 pb-20 lg:pb-6">
+            <slot />
+          </main>
+          
+          <!-- Mobile Bottom Navigation -->
+          {isAuthenticated && (
+            <nav class="lg:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 px-4 py-2" role="navigation" aria-label="Nawigacja mobilna">
+              <div class="flex justify-around items-center">
+                <a 
+                  href="/dashboard" 
+                  class="flex flex-col items-center py-2 px-1 text-xs text-gray-600 hover:text-blue-600 transition-colors"
+                  aria-label="Dashboard"
+                >
+                  <svg class="w-6 h-6 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2H5a2 2 0 00-2-2z"></path>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5a2 2 0 012-2h4a2 2 0 012 2v4H8V5z"></path>
+                  </svg>
+                  Dashboard
+                </a>
+                <a 
+                  href="/generate" 
+                  class="flex flex-col items-center py-2 px-1 text-xs text-gray-600 hover:text-blue-600 transition-colors"
+                  aria-label="Generowanie"
+                >
+                  <svg class="w-6 h-6 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                  </svg>
+                  Generuj
+                </a>
+                <a 
+                  href="/flashcards" 
+                  class="flex flex-col items-center py-2 px-1 text-xs text-gray-600 hover:text-blue-600 transition-colors"
+                  aria-label="Fiszki"
+                >
+                  <svg class="w-6 h-6 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path>
+                  </svg>
+                  Fiszki
+                </a>
+                <a 
+                  href="/review" 
+                  class="flex flex-col items-center py-2 px-1 text-xs text-gray-600 hover:text-blue-600 transition-colors"
+                  aria-label="Powtórki"
+                >
+                  <svg class="w-6 h-6 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                  </svg>
+                  Powtórki
+                </a>
+                <a 
+                  href="/settings" 
+                  class="flex flex-col items-center py-2 px-1 text-xs text-gray-600 hover:text-blue-600 transition-colors"
+                  aria-label="Ustawienia"
+                >
+                  <svg class="w-6 h-6 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                  </svg>
+                  Ustawienia
+                </a>
+              </div>
+            </nav>
+          )}
+          
+          <!-- Footer -->
+          <footer class="bg-white border-t mt-12 lg:block hidden">
+            <div class="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
+              <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div>
+                  <h3 class="text-lg font-semibold text-gray-900 mb-4">Fiszki AI</h3>
+                  <p class="text-gray-600 text-sm">
+                    Innowacyjna platforma do nauki z wykorzystaniem sztucznej inteligencji.
+                  </p>
+                </div>
+                <div>
+                  <h4 class="text-md font-semibold text-gray-900 mb-4">Funkcje</h4>
+                  <ul class="space-y-2 text-sm text-gray-600">
+                    <li><a href="/flashcards" class="hover:text-blue-600">Twoje fiszki</a></li>
+                    <li><a href="/generate" class="hover:text-blue-600">Generator fiszek</a></li>
+                    <li><a href="/dashboard" class="hover:text-blue-600">Pulpit</a></li>
+                  </ul>
+                </div>
+                <div>
+                  <h4 class="text-md font-semibold text-gray-900 mb-4">Konto</h4>
+                  <ul class="space-y-2 text-sm text-gray-600">
+                    {isAuthenticated ? (
+                      <>
+                        <li><a href="/settings" class="hover:text-blue-600">Ustawienia</a></li>
+                        <li><button onclick="fetch('/api/auth/logout', { method: 'POST' }).then(() => window.location.href = '/auth?mode=login')" class="hover:text-blue-600">Wyloguj</button></li>
+                      </>
+                    ) : (
+                      <>
+                        <li><a href="/auth?mode=login" class="hover:text-blue-600">Logowanie</a></li>
+                        <li><a href="/auth?mode=register" class="hover:text-blue-600">Rejestracja</a></li>
+                      </>
+                    )}
+                  </ul>
+                </div>
+              </div>
+              <div class="border-t border-gray-200 mt-8 pt-4">
+                <p class="text-center text-sm text-gray-500">
+                  © 2024 Fiszki AI. Wszystkie prawa zastrzeżone.
+                </p>
+              </div>
+            </div>
+          </footer>
+        </div>
+      </>
+    )}
+  </body>
+</html> 

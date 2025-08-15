@@ -1,8 +1,13 @@
 ---
-import Welcome from "../components/Welcome.astro";
-import Layout from "../layouts/Layout.astro";
----
+// Check authentication status
+const isAuthenticated = Astro.cookies.has("sb-access-token");
 
-<Layout>
-  <Welcome />
-</Layout>
+// Redirect based on authentication status
+if (isAuthenticated) {
+  // User is authenticated - redirect to dashboard
+  return Astro.redirect("/dashboard");
+} else {
+  // User is not authenticated - redirect to login
+  return Astro.redirect("/auth?mode=login");
+}
+---

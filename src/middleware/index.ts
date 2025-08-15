@@ -7,7 +7,7 @@ import { supabaseClient } from "../db/supabase.client";
 
 const AUTH_ROUTES = ["/login", "/register", "/reset-password"];
 
-const PROTECTED_ROUTES = ["/dashboard", "/flashcards", "/generate", "/change-password"];
+const PROTECTED_ROUTES = ["/dashboard", "/flashcards", "/generate", "/change-password", "/review"];
 
 // Function to check if route matches pattern
 const isRouteMatch = (pathname: string, routes: string[]): boolean => {

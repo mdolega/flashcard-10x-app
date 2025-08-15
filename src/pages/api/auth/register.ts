@@ -1,6 +1,6 @@
 import type { APIRoute } from "astro";
 import { z } from "zod";
-import type { RegisterDTO } from "../../../types/auth.types";
+import type { RegisterDTO } from "../../../types";
 
 // Validation schema
 const registerSchema = z.object({
