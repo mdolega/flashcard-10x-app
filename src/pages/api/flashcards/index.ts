@@ -16,14 +16,26 @@ export const GET: APIRoute = async ({ request, url, locals }) => {
 
     // Parse and validate query parameters
     const searchParams = new URLSearchParams(url.search);
-    const queryParams = {
-      page: searchParams.get("page"),
-      limit: searchParams.get("limit"),
-      status: searchParams.get("status"),
-      difficulty: searchParams.get("difficulty"),
-      sort_by: searchParams.get("sort_by"),
-      order: searchParams.get("order"),
-    };
+    const queryParams: Record<string, string | null> = {};
+
+    // Only include parameters that are actually provided
+    const page = searchParams.get("page");
+    if (page) queryParams.page = page;
+
+    const limit = searchParams.get("limit");
+    if (limit) queryParams.limit = limit;
+
+    const status = searchParams.get("status");
+    if (status) queryParams.status = status;
+
+    const difficulty = searchParams.get("difficulty");
+    if (difficulty) queryParams.difficulty = difficulty;
+
+    const sort_by = searchParams.get("sort_by");
+    if (sort_by) queryParams.sort_by = sort_by;
+
+    const order = searchParams.get("order");
+    if (order) queryParams.order = order;
 
     const validatedParams = flashcardQuerySchema.parse(queryParams);
 
