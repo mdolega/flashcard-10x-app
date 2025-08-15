@@ -13,9 +13,6 @@ concurrency:
 permissions:
   contents: read
 
-env:
-  NODE_ENV: production
-
 jobs:
   lint:
     runs-on: ubuntu-latest
@@ -78,6 +75,8 @@ jobs:
 
       - name: Build (production)
         run: npm run build
+        env:
+          NODE_ENV: production
 
       - name: Upload build artifact
         uses: actions/upload-artifact@v4
