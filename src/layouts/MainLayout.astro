@@ -1,0 +1,232 @@
+---
+import "../styles/global.css";
+
+interface Props {
+  title?: string;
+  showNavigation?: boolean;
+}
+
+const { title = "Fiszki AI", showNavigation = true } = Astro.props;
+---
+
+<!doctype html>
+<html lang="pl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" type="image/png" href="/favicon.png" />
+    <meta name="generator" content={Astro.generator} />
+    <title>{title}</title>
+  </head>
+  <body class="min-h-screen bg-gray-50">
+    <!-- Main header with navigation -->
+    <header class="sticky top-0 z-50 w-full border-b bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/80">
+      <div class="container mx-auto px-4">
+        <div class="flex h-14 items-center justify-between">
+          <!-- Logo -->
+          <div class="flex items-center space-x-2">
+            <a href="/dashboard" class="flex items-center space-x-2 text-xl font-bold text-gray-900">
+              <span class="text-2xl">🧠</span>
+              <span>Fiszki AI</span>
+            </a>
+          </div>
+
+          <!-- Navigation menu -->
+          {showNavigation && (
+            <nav class="hidden md:flex items-center space-x-6">
+              <a 
+                href="/dashboard" 
+                class="text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors"
+              >
+                Dashboard
+              </a>
+              <a 
+                href="/flashcards" 
+                class="text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors"
+              >
+                Moje Fiszki
+              </a>
+              <a 
+                href="/generate" 
+                class="text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors"
+              >
+                Generuj
+              </a>
+            </nav>
+          )}
+
+          <!-- User menu -->
+          {showNavigation && (
+            <div class="flex items-center space-x-4">
+              <div class="relative">
+                <button 
+                  id="user-menu-button"
+                  class="flex items-center space-x-2 rounded-full bg-gray-100 px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                  aria-expanded="false"
+                  aria-haspopup="true"
+                >
+                  <span class="text-sm">👤</span>
+                  <span class="hidden sm:inline-block">Konto</span>
+                  <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                  </svg>
+                </button>
+                
+                <!-- Dropdown menu (hidden by default, shown with JS) -->
+                <div 
+                  id="user-menu"
+                  class="absolute right-0 mt-2 w-48 origin-top-right rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none hidden"
+                  role="menu"
+                  aria-orientation="vertical"
+                  aria-labelledby="user-menu-button"
+                >
+                  <a href="/change-password" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" role="menuitem">
+                    Zmień hasło
+                  </a>
+                  <button 
+                    id="logout-button"
+                    class="block w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100"
+                    role="menuitem"
+                  >
+                    Wyloguj się
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          <!-- Mobile menu button -->
+          {showNavigation && (
+            <button 
+              id="mobile-menu-button"
+              class="md:hidden rounded-md p-2 text-gray-600 hover:bg-gray-100 hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              aria-expanded="false"
+            >
+              <span class="sr-only">Otwórz menu główne</span>
+              <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+              </svg>
+            </button>
+          )}
+        </div>
+
+        <!-- Mobile navigation menu -->
+        {showNavigation && (
+          <div id="mobile-menu" class="md:hidden hidden">
+            <div class="space-y-1 px-2 pb-3 pt-2">
+              <a href="/dashboard" class="block rounded-md px-3 py-2 text-base font-medium text-gray-600 hover:bg-gray-100 hover:text-gray-900">
+                Dashboard
+              </a>
+              <a href="/flashcards" class="block rounded-md px-3 py-2 text-base font-medium text-gray-600 hover:bg-gray-100 hover:text-gray-900">
+                Moje Fiszki
+              </a>
+              <a href="/generate" class="block rounded-md px-3 py-2 text-base font-medium text-gray-600 hover:bg-gray-100 hover:text-gray-900">
+                Generuj
+              </a>
+              <hr class="my-2" />
+              <a href="/change-password" class="block rounded-md px-3 py-2 text-base font-medium text-gray-600 hover:bg-gray-100 hover:text-gray-900">
+                Zmień hasło
+              </a>
+              <button 
+                id="mobile-logout-button"
+                class="block w-full rounded-md px-3 py-2 text-left text-base font-medium text-gray-600 hover:bg-gray-100 hover:text-gray-900"
+              >
+                Wyloguj się
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
+    </header>
+
+    <!-- Main content -->
+    <main class="flex-1">
+      <slot />
+    </main>
+
+    <!-- Footer -->
+    <footer class="border-t bg-white">
+      <div class="container mx-auto px-4 py-8">
+        <div class="flex flex-col items-center justify-between space-y-4 md:flex-row md:space-y-0">
+          <div class="flex items-center space-x-2 text-sm text-gray-600">
+            <span class="text-lg">🧠</span>
+            <span>Fiszki AI - Ucz się efektywnie z AI</span>
+          </div>
+          <div class="text-sm text-gray-500">
+                         &copy; 2025 Fiszki AI. Wszystkie prawa zastrzeżone.
+          </div>
+        </div>
+      </div>
+    </footer>
+
+    <!-- Simple JavaScript for menu interactions -->
+    <script>
+      document.addEventListener('DOMContentLoaded', function() {
+        // User menu dropdown
+        const userMenuButton = document.getElementById('user-menu-button');
+        const userMenu = document.getElementById('user-menu');
+        
+        if (userMenuButton && userMenu) {
+          userMenuButton.addEventListener('click', function() {
+            const isHidden = userMenu.classList.contains('hidden');
+            userMenu.classList.toggle('hidden', !isHidden);
+            userMenuButton.setAttribute('aria-expanded', isHidden.toString());
+          });
+
+          // Close dropdown when clicking outside
+          document.addEventListener('click', function(event) {
+            if (!userMenuButton.contains(event.target) && !userMenu.contains(event.target)) {
+              userMenu.classList.add('hidden');
+              userMenuButton.setAttribute('aria-expanded', 'false');
+            }
+          });
+        }
+
+        // Mobile menu toggle
+        const mobileMenuButton = document.getElementById('mobile-menu-button');
+        const mobileMenu = document.getElementById('mobile-menu');
+        
+        if (mobileMenuButton && mobileMenu) {
+          mobileMenuButton.addEventListener('click', function() {
+            const isHidden = mobileMenu.classList.contains('hidden');
+            mobileMenu.classList.toggle('hidden', !isHidden);
+            mobileMenuButton.setAttribute('aria-expanded', isHidden.toString());
+          });
+        }
+
+        // Logout functionality
+        const logoutButtons = document.querySelectorAll('#logout-button, #mobile-logout-button');
+        logoutButtons.forEach(button => {
+          button.addEventListener('click', async function() {
+            try {
+              const response = await fetch('/api/auth/logout', {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                },
+              });
+
+              if (response.ok) {
+                window.location.href = '/login';
+              } else {
+                console.error('Logout failed');
+              }
+            } catch (error) {
+              console.error('Logout error:', error);
+            }
+          });
+        });
+      });
+    </script>
+  </body>
+</html>
+
+<style>
+  html {
+    scroll-behavior: smooth;
+  }
+  
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+  }
+</style> 
