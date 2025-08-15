@@ -377,11 +377,15 @@ export class FlashcardService {
     grade: 0 | 1 | 2 | 3 | 4 | 5
   ): Promise<import("../../types").ReviewResultDto> {
     const { calculate_sm2_next, compute_next_review_at } = await import("./srs.service");
-    
+
     // Step 1: Try to fetch SRS fields; handle missing columns gracefully
-    let card:
-      | { id: string; user_id: string; easiness?: number | null; repetition?: number | null; interval_days?: number | null }
-      | null = null;
+    let card: {
+      id: string;
+      user_id: string;
+      easiness?: number | null;
+      repetition?: number | null;
+      interval_days?: number | null;
+    } | null = null;
     let fetchError: any | null = null;
     try {
       const result = await this.supabase
