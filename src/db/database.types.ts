@@ -69,7 +69,12 @@ export interface Database {
           created_at: string;
           deleted_at: string | null;
           difficulty: string;
+          easiness: number;
           id: string;
+          interval_days: number;
+          last_review_at: string | null;
+          next_review_at: string;
+          lapses: number;
           question: string;
           status: string;
           updated_at: string;
@@ -81,7 +86,12 @@ export interface Database {
           created_at?: string;
           deleted_at?: string | null;
           difficulty: string;
+          easiness?: number;
           id?: string;
+          interval_days?: number;
+          last_review_at?: string | null;
+          next_review_at?: string;
+          lapses?: number;
           question: string;
           status: string;
           updated_at?: string;
@@ -93,7 +103,12 @@ export interface Database {
           created_at?: string;
           deleted_at?: string | null;
           difficulty?: string;
+          easiness?: number;
           id?: string;
+          interval_days?: number;
+          last_review_at?: string | null;
+          next_review_at?: string;
+          lapses?: number;
           question?: string;
           status?: string;
           updated_at?: string;

@@ -10,10 +10,10 @@ export const GET: APIRoute = async ({ url, locals }) => {
     // Basic runtime config guard: allow UI to work without DB during setup
     if (!import.meta.env.SUPABASE_URL || !import.meta.env.SUPABASE_KEY) {
       console.warn("/api/flashcards/review: Missing SUPABASE_URL/KEY – returning empty list");
-      return new Response(
-        JSON.stringify({ data: [], pagination: { page: 1, limit: 10, total: 0 } }),
-        { status: 200, headers: { "Content-Type": "application/json" } }
-      );
+      return new Response(JSON.stringify({ data: [], pagination: { page: 1, limit: 10, total: 0 } }), {
+        status: 200,
+        headers: { "Content-Type": "application/json" },
+      });
     }
 
     const {
@@ -47,19 +47,17 @@ export const GET: APIRoute = async ({ url, locals }) => {
   } catch (error) {
     console.error("Error in /api/flashcards/review GET:", error);
     if (error instanceof ZodError) {
-      return new Response(
-        JSON.stringify({ message: "Invalid query parameters", errors: error.errors }),
-        { status: 400, headers: { "Content-Type": "application/json" } }
-      );
+      return new Response(JSON.stringify({ message: "Invalid query parameters", errors: error.errors }), {
+        status: 400,
+        headers: { "Content-Type": "application/json" },
+      });
     }
 
     // Always return empty list for now to unblock UI while SRS migrations/config may be pending
     console.warn("Returning empty review list due to error", (error as Error)?.message);
-    return new Response(
-      JSON.stringify({ data: [], pagination: { page: 1, limit: 10, total: 0 } }),
-      { status: 200, headers: { "Content-Type": "application/json" } }
-    );
+    return new Response(JSON.stringify({ data: [], pagination: { page: 1, limit: 10, total: 0 } }), {
+      status: 200,
+      headers: { "Content-Type": "application/json" },
+    });
   }
 };
-
-

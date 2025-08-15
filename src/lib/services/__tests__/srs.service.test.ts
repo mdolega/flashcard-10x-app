@@ -55,5 +55,3 @@ describe("srs.service - compute_next_review_at", () => {
     expect(d.toISOString()).toBe("2024-01-15T00:00:00.000Z");
   });
 });
-
-

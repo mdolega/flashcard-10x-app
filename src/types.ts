@@ -245,7 +245,7 @@ export interface ResponseFormat {
   json_schema: {
     name: string;
     strict: boolean;
-    schema: Record<string, any>;
+    schema: Record<string, unknown>;
   };
 }
 

@@ -19,7 +19,16 @@ export function ReviewApp() {
       ) : (
         <div className="mt-6 text-center text-gray-600">Brak fiszek do powtórki.</div>
       )}
-      <ReviewControls onGrade={(g) => gradeCurrent(g).catch(() => {})} disabled={!current} />
+      <ReviewControls
+        onGrade={async (g) => {
+          try {
+            await gradeCurrent(g);
+          } catch {
+            /* no-op */
+          }
+        }}
+        disabled={!current}
+      />
     </>
   );
 }

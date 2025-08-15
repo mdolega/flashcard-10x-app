@@ -24,8 +24,6 @@ const isAuthenticated = Astro.cookies.has('sb-access-token');
   </head>
   <body class="h-full bg-gray-50">
     {isAuthPage ? (
-      <>
-        <!-- Simplified header for auth pages -->
         <div class="min-h-full flex flex-col">
           <header class="bg-white shadow-sm">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -48,15 +46,12 @@ const isAuthenticated = Astro.cookies.has('sb-access-token');
           <footer class="bg-white border-t">
             <div class="max-w-7xl mx-auto py-4 px-4 sm:px-6 lg:px-8">
               <p class="text-center text-sm text-gray-500">
-                © 2024 Fiszki AI. Wszystkie prawa zastrzeżone.
+                © 2025 Fiszki AI. Wszystkie prawa zastrzeżone.
               </p>
             </div>
           </footer>
         </div>
-      </>
-    ) : (
-      <>
-        <!-- Full layout with navigation for protected/main pages -->
+      ) : (
         <div class="min-h-full">
           <!-- Desktop Navigation -->
           <header class="bg-white shadow-sm lg:block hidden">
@@ -225,29 +220,25 @@ const isAuthenticated = Astro.cookies.has('sb-access-token');
                 <div>
                   <h4 class="text-md font-semibold text-gray-900 mb-4">Konto</h4>
                   <ul class="space-y-2 text-sm text-gray-600">
-                    {isAuthenticated ? (
-                      <>
-                        <li><a href="/settings" class="hover:text-blue-600">Ustawienia</a></li>
-                        <li><button onclick="fetch('/api/auth/logout', { method: 'POST' }).then(() => window.location.href = '/auth?mode=login')" class="hover:text-blue-600">Wyloguj</button></li>
-                      </>
-                    ) : (
-                      <>
-                        <li><a href="/auth?mode=login" class="hover:text-blue-600">Logowanie</a></li>
-                        <li><a href="/auth?mode=register" class="hover:text-blue-600">Rejestracja</a></li>
-                      </>
+                    {isAuthenticated && <li><a href="/settings" class="hover:text-blue-600">Ustawienia</a></li>}
+                    {isAuthenticated && (
+                      <li>
+                        <button onclick="fetch('/api/auth/logout', { method: 'POST' }).then(() => window.location.href = '/auth?mode=login')" class="hover:text-blue-600">Wyloguj</button>
+                      </li>
                     )}
+                    {!isAuthenticated && <li><a href="/auth?mode=login" class="hover:text-blue-600">Logowanie</a></li>}
+                    {!isAuthenticated && <li><a href="/auth?mode=register" class="hover:text-blue-600">Rejestracja</a></li>}
                   </ul>
                 </div>
               </div>
               <div class="border-t border-gray-200 mt-8 pt-4">
                 <p class="text-center text-sm text-gray-500">
-                  © 2024 Fiszki AI. Wszystkie prawa zastrzeżone.
+                  © 2025 Fiszki AI. Wszystkie prawa zastrzeżone.
                 </p>
               </div>
             </div>
           </footer>
         </div>
-      </>
-    )}
+      )}
   </body>
 </html> 

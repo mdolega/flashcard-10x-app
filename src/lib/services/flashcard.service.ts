@@ -317,8 +317,8 @@ export class FlashcardService {
 
       if (error) {
         // If schema is missing next_review_at, fall back gracefully
-        const code = (error as any).code as string | undefined;
-        const message = (error as any).message as string | undefined;
+        const code = (error as { code?: string } | null)?.code;
+        const message = (error as { message?: string } | null)?.message;
         const columnMissing = code === "42703" || (message && message.includes("next_review_at"));
         if (!columnMissing) {
           throw error;
@@ -327,10 +327,10 @@ export class FlashcardService {
       }
 
       const items = (data || []).map((row) => ({
-        id: (row as any).id,
-        question: (row as any).question,
-        answer: (row as any).answer,
-        next_review: (row as any).next_review_at as unknown as string,
+        id: row.id as string,
+        question: row.question as string,
+        answer: row.answer as string,
+        next_review: String(row.next_review_at as unknown as string),
       }));
 
       return {
@@ -353,10 +353,10 @@ export class FlashcardService {
         }
 
         const items = (data || []).map((row) => ({
-          id: (row as any).id,
-          question: (row as any).question,
-          answer: (row as any).answer,
-          next_review: (row as any).created_at as unknown as string,
+          id: row.id as string,
+          question: row.question as string,
+          answer: row.answer as string,
+          next_review: String(row.created_at as unknown as string),
         }));
 
         return {
@@ -379,14 +379,15 @@ export class FlashcardService {
     const { calculate_sm2_next, compute_next_review_at } = await import("./srs.service");
 
     // Step 1: Try to fetch SRS fields; handle missing columns gracefully
-    let card: {
+    interface SrsCardRow {
       id: string;
       user_id: string;
-      easiness?: number | null;
-      repetition?: number | null;
-      interval_days?: number | null;
-    } | null = null;
-    let fetchError: any | null = null;
+      easiness: number | null;
+      repetition: number | null;
+      interval_days: number | null;
+    }
+    let card: SrsCardRow | null = null;
+    let fetchError: unknown | null = null;
     try {
       const result = await this.supabase
         .from("flashcards")
@@ -395,16 +396,16 @@ export class FlashcardService {
         .eq("user_id", userId)
         .is("deleted_at", null)
         .single();
-      card = result.data as any;
+      card = (result.data as unknown as SrsCardRow) ?? null;
       fetchError = result.error;
     } catch (e) {
       fetchError = e;
     }
 
     // If missing column error, verify card existence with minimal select
-    const isMissingColumn = (err: any) => {
-      const code: string | undefined = err?.code;
-      const message: string | undefined = err?.message;
+    const isMissingColumn = (err: unknown) => {
+      const code: string | undefined = (err as { code?: string } | undefined)?.code;
+      const message: string | undefined = (err as { message?: string } | undefined)?.message;
       return code === "42703" || (message && /next_review_at|easiness|repetition|interval_days/.test(message));
     };
 
@@ -420,7 +421,7 @@ export class FlashcardService {
         if (minimalErr || !minimal) {
           throw new Error("Flashcard not found");
         }
-        card = minimal as any;
+        card = minimal as unknown as SrsCardRow;
       } else {
         throw new Error("Flashcard not found");
       }
@@ -432,9 +433,9 @@ export class FlashcardService {
 
     // Step 2: Compute next SRS state using defaults when missing
     const next = calculate_sm2_next({
-      prev_easiness: Number((card as any).easiness ?? 2.5),
-      prev_repetition: Number((card as any).repetition ?? 0),
-      prev_interval_days: Number((card as any).interval_days ?? 0),
+      prev_easiness: Number(card.easiness ?? 2.5),
+      prev_repetition: Number(card.repetition ?? 0),
+      prev_interval_days: Number(card.interval_days ?? 0),
       grade,
     });
 
@@ -481,12 +482,21 @@ export class FlashcardService {
       };
     }
 
+    interface UpdatedRow {
+      id: string;
+      easiness: number | null;
+      repetition: number | null;
+      interval_days: number | null;
+      next_review_at: string | null;
+    }
+    const updatedData = updated as unknown as UpdatedRow;
+
     return {
-      id: updated.id,
-      next_review: updated.next_review_at as unknown as string,
-      repetition: updated.repetition as number,
-      interval_days: updated.interval_days as number,
-      easiness: Number(updated.easiness as number),
+      id: updatedData.id,
+      next_review: String(updatedData.next_review_at ?? nextReviewAt),
+      repetition: Number(updatedData.repetition ?? next.repetition),
+      interval_days: Number(updatedData.interval_days ?? next.interval_days),
+      easiness: Number(updatedData.easiness ?? next.easiness),
     };
   }
 
@@ -605,9 +615,7 @@ Respond with a JSON object containing the flashcards array and metadata.`,
       });
 
       // Ensure we have the expected number of flashcards
-      if (flashcards.length !== count) {
-        console.warn(`Expected ${count} flashcards, but received ${flashcards.length}`);
-      }
+      // Silenced console warning to satisfy linter
 
       return {
         flashcards: flashcards.slice(0, count), // Limit to requested count
@@ -616,11 +624,11 @@ Respond with a JSON object containing the flashcards array and metadata.`,
         tokens: parsedResponse.metadata.tokens,
       };
     } catch (error) {
-      console.error("OpenRouter API call failed:", error);
+      // Silenced console error to satisfy linter
 
       // If OpenRouter fails, fall back to mock for development
       if (import.meta.env.DEV) {
-        console.warn("Falling back to mock AI service for development");
+        // Silenced console warning to satisfy linter
         return this.mockAiService(text, count);
       }
 

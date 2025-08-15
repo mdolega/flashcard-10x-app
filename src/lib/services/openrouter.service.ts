@@ -120,7 +120,7 @@ export class OpenRouterService {
    * Weryfikuje odpowiedź za pomocą Zod i mapuje na wewnętrzne typy
    */
   private _validateAndMap(response: OpenRouterResponse): ChatMessage[] {
-    console.log("response", response);
+    // Debug logging disabled to satisfy no-console lint in production
     if (!response.choices || response.choices.length === 0) {
       throw new SchemaValidationError("No choices in response");
     }
@@ -145,15 +145,16 @@ export class OpenRouterService {
 
       if (axiosError.response) {
         const status = axiosError.response.status;
-        const responseData = axiosError.response.data as any;
+        const responseData = axiosError.response.data as { error?: { message?: string } } | undefined;
         const message = responseData?.error?.message || axiosError.message;
 
         switch (status) {
           case 401:
             throw new AuthenticationError(`Authentication failed: ${message}`);
-          case 429:
+          case 429: {
             const retryAfter = axiosError.response.headers["retry-after"];
             throw new RateLimitError(`Rate limit exceeded: ${message}`, retryAfter ? parseInt(retryAfter) : undefined);
+          }
           case 500:
           case 502:
           case 503:
@@ -227,9 +228,10 @@ export class OpenRouterService {
           (error.response?.status ? error.response.status >= 500 : false)
         );
       },
-      onRetry: (retryCount, error, requestConfig) => {
-        console.warn(`[OpenRouter] Retry attempt ${retryCount} for ${requestConfig.url}`, {
-          error: error.message,
+      onRetry: (retryCount, error) => {
+        console.log(`[OpenRouter] Retrying request (attempt ${retryCount + 1})`, {
+          status: error.response?.status,
+          url: error.config?.url,
           timestamp: new Date().toISOString(),
         });
       },

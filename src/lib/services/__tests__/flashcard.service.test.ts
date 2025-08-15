@@ -1,18 +1,19 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
 
 // Mocks state controllers
-type SupabaseResult<T> = { data: T | null; error: any } & { count?: number };
+type SupabaseError = { message?: string; code?: string } | null;
+type SupabaseResult<T> = { data: T | null; error: SupabaseError } & { count?: number };
 
 const supabaseState = {
   mode: "idle" as "insertSingle" | "fetchStatusSingle" | "updateSingle" | "deleteUpdate" | "insertMany" | "idle",
-  insertSingleResult: { data: null, error: null } as SupabaseResult<any>,
-  fetchStatusSingleResult: { data: { status: "ai-generated" }, error: null } as SupabaseResult<any>,
+  insertSingleResult: { data: null, error: null } as SupabaseResult<Record<string, unknown>>,
+  fetchStatusSingleResult: { data: { status: "ai-generated" }, error: null } as SupabaseResult<{ status: string }>,
   updateSingleResult: {
     data: { id: "id-1", status: "ai-edited", updated_at: "2025-01-01T00:00:00.000Z" },
     error: null,
-  } as SupabaseResult<any>,
-  deleteUpdateResult: { error: null } as { error: any },
-  insertManyResult: { error: null } as { error: any },
+  } as SupabaseResult<{ id: string; status: string; updated_at: string }>,
+  deleteUpdateResult: { error: null } as { error: SupabaseError },
+  insertManyResult: { error: null } as { error: SupabaseError },
 };
 
 const openRouterState = {
@@ -37,8 +38,21 @@ const aiLogState = {
 // Module mocks
 vi.mock("../../../db/supabase.client", () => {
   // chainable thenable builder
-  const builder: any = {
-    _lastUpdatePayload: undefined as any,
+  const builder: {
+    _lastUpdatePayload: unknown;
+    select: (cols?: string) => typeof builder;
+    insert: (payload: unknown) => typeof builder;
+    update: (payload: unknown) => typeof builder;
+    order: () => typeof builder;
+    range: () => typeof builder;
+    eq: () => typeof builder;
+    is: () => typeof builder;
+    single: () => Promise<SupabaseResult<Record<string, unknown>>>;
+    then: (
+      onFulfilled: (v: { data: null; error: SupabaseError } | { error: SupabaseError }) => unknown
+    ) => Promise<unknown>;
+  } = {
+    _lastUpdatePayload: undefined,
     select: vi.fn((cols?: string) => {
       if (typeof cols === "string" && cols.trim() === "status") {
         supabaseState.mode = "fetchStatusSingle";
@@ -47,7 +61,7 @@ vi.mock("../../../db/supabase.client", () => {
       }
       return builder;
     }),
-    insert: vi.fn((payload: any) => {
+    insert: vi.fn((payload: unknown) => {
       if (Array.isArray(payload)) {
         supabaseState.mode = "insertMany";
       } else {
@@ -55,7 +69,7 @@ vi.mock("../../../db/supabase.client", () => {
       }
       return builder;
     }),
-    update: vi.fn((payload: any) => {
+    update: vi.fn((payload: unknown) => {
       builder._lastUpdatePayload = payload;
       supabaseState.mode = "updateSingle";
       return builder;
@@ -70,7 +84,7 @@ vi.mock("../../../db/supabase.client", () => {
       if (supabaseState.mode === "updateSingle") return supabaseState.updateSingleResult;
       return { data: null, error: null };
     }),
-    then: (onFulfilled: any) => {
+    then: (onFulfilled) => {
       // allow awaiting builder for delete/update without single()
       if (supabaseState.mode === "deleteUpdate")
         return Promise.resolve(supabaseState.deleteUpdateResult).then(onFulfilled);
@@ -81,14 +95,14 @@ vi.mock("../../../db/supabase.client", () => {
   };
 
   const supabaseClient = {
-    from: vi.fn((table: string) => {
+    from: vi.fn(() => {
       return new Proxy(builder, {
         get(target, prop: string) {
           if (prop === "select") {
             // detect status-only select for fetch
             supabaseState.mode = prop === "select" ? supabaseState.mode : supabaseState.mode;
           }
-          return (target as any)[prop];
+          return (target as Record<string, unknown>)[prop as keyof typeof target];
         },
       });
     }),
@@ -109,7 +123,6 @@ vi.mock("../ai-generation-log.service", () => {
 vi.mock("../openrouter.service", () => {
   return {
     OpenRouterService: class {
-      constructor(_: any) {}
       setDefaultSystemMessage = vi.fn();
       generateChatCompletion = vi.fn(async () => openRouterState.generateResult);
     },
