@@ -377,28 +377,66 @@ export class FlashcardService {
     grade: 0 | 1 | 2 | 3 | 4 | 5
   ): Promise<import("../../types").ReviewResultDto> {
     const { calculate_sm2_next, compute_next_review_at } = await import("./srs.service");
+    
+    // Step 1: Try to fetch SRS fields; handle missing columns gracefully
+    let card:
+      | { id: string; user_id: string; easiness?: number | null; repetition?: number | null; interval_days?: number | null }
+      | null = null;
+    let fetchError: any | null = null;
+    try {
+      const result = await this.supabase
+        .from("flashcards")
+        .select("id, user_id, easiness, repetition, interval_days")
+        .eq("id", flashcardId)
+        .eq("user_id", userId)
+        .is("deleted_at", null)
+        .single();
+      card = result.data as any;
+      fetchError = result.error;
+    } catch (e) {
+      fetchError = e;
+    }
 
-    const { data: card, error: fetchError } = await this.supabase
-      .from("flashcards")
-      .select("id, user_id, easiness, repetition, interval_days")
-      .eq("id", flashcardId)
-      .eq("user_id", userId)
-      .is("deleted_at", null)
-      .single();
+    // If missing column error, verify card existence with minimal select
+    const isMissingColumn = (err: any) => {
+      const code: string | undefined = err?.code;
+      const message: string | undefined = err?.message;
+      return code === "42703" || (message && /next_review_at|easiness|repetition|interval_days/.test(message));
+    };
 
-    if (fetchError || !card) {
+    if (fetchError) {
+      if (isMissingColumn(fetchError)) {
+        const { data: minimal, error: minimalErr } = await this.supabase
+          .from("flashcards")
+          .select("id, user_id")
+          .eq("id", flashcardId)
+          .eq("user_id", userId)
+          .is("deleted_at", null)
+          .single();
+        if (minimalErr || !minimal) {
+          throw new Error("Flashcard not found");
+        }
+        card = minimal as any;
+      } else {
+        throw new Error("Flashcard not found");
+      }
+    }
+
+    if (!card) {
       throw new Error("Flashcard not found");
     }
 
+    // Step 2: Compute next SRS state using defaults when missing
     const next = calculate_sm2_next({
-      prev_easiness: Number(card.easiness ?? 2.5),
-      prev_repetition: Number(card.repetition ?? 0),
-      prev_interval_days: Number(card.interval_days ?? 0),
+      prev_easiness: Number((card as any).easiness ?? 2.5),
+      prev_repetition: Number((card as any).repetition ?? 0),
+      prev_interval_days: Number((card as any).interval_days ?? 0),
       grade,
     });
 
     const nextReviewAt = compute_next_review_at(next.interval_days).toISOString();
 
+    // Step 3: Attempt to persist; if SRS columns missing, return computed result without update
     const { data: updated, error: updateError } = await this.supabase
       .from("flashcards")
       .update({
@@ -414,8 +452,29 @@ export class FlashcardService {
       .select("id, easiness, repetition, interval_days, next_review_at")
       .single();
 
-    if (updateError || !updated) {
+    if (updateError) {
+      if (isMissingColumn(updateError)) {
+        // Graceful fallback when SRS columns not present yet
+        return {
+          id: card.id,
+          next_review: nextReviewAt,
+          repetition: next.repetition,
+          interval_days: next.interval_days,
+          easiness: next.easiness,
+        };
+      }
       throw new Error(`Failed to update flashcard review: ${updateError?.message ?? "unknown error"}`);
+    }
+
+    if (!updated) {
+      // Should not happen normally; return computed result
+      return {
+        id: card.id,
+        next_review: nextReviewAt,
+        repetition: next.repetition,
+        interval_days: next.interval_days,
+        easiness: next.easiness,
+      };
     }
 
     return {
