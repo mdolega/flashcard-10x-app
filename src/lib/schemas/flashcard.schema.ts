@@ -6,7 +6,7 @@ export const flashcardGenerateSchema = z.object({
       required_error: "Text is required",
       invalid_type_error: "Text must be a string",
     })
-    .min(1000, "Text must be at least 1000 characters long")
+    .min(500, "Text must be at least 500 characters long")
     .max(10000, "Text must not exceed 10000 characters"),
 
   count: z

@@ -1,7 +1,13 @@
 import { defineConfig } from "vitest/config";
-import react from "@vitejs/plugin-react";
+// NOTE: React plugin is not required for Vitest in this setup
+import { fileURLToPath } from "url";
+
 export default defineConfig({
-  plugins: [react()],
+  resolve: {
+    alias: {
+      "@": fileURLToPath(new URL("./src", import.meta.url)),
+    },
+  },
   test: {
     globals: true,
     environment: "happy-dom",

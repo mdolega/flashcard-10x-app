@@ -19,20 +19,21 @@ A web application for AI-assisted generation, creation, and management of educat
 
 ## Tech Stack
 
-- **Frontend**  
-  - Astro 5 & React 19  
-  - TypeScript 5  
-  - Tailwind 4  
-  - Shadcn/ui  
-- **Backend**  
-  - Supabase (PostgreSQL + `@supabase/supabase-js`)  
-- **AI Integration**  
-  - Openrouter.ai (configurable model selection)  
-- **CI/CD & Hosting**  
-  - GitHub Actions  
-  - Docker on DigitalOcean  
-- **Runtime**  
-  - Node.js v22.14.0 (managed via `.nvmrc`)
+- **Frontend**
+  - Astro 5
+  - React 19
+  - TypeScript 5
+  - Tailwind 4
+  - Shadcn/ui
+- **Backend**
+  - Supabase (PostgreSQL + `@supabase/supabase-js`)
+- **AI Integration**
+  - Openrouter.ai (access via `openrouter.service.ts`)
+- **CI/CD & Hosting**
+  - GitHub Actions (tests + production build)
+  - Docker on DigitalOcean
+- **Runtime**
+  - Node.js v22.x (recommended v22.14.0)
 
 ---
 
@@ -40,7 +41,7 @@ A web application for AI-assisted generation, creation, and management of educat
 
 ### Prerequisites
 
-- [Node.js](https://nodejs.org/) v22.14.0 (use nvm: `nvm use`)  
+- [Node.js](https://nodejs.org/) v22.x (use nvm: `nvm use`)  
 - A Supabase project with credentials:  
   - `SUPABASE_URL`  
   - `SUPABASE_KEY`  
@@ -94,46 +95,84 @@ Open `http://localhost:3000` in your browser.
 - `npm run format`  
   Format files with Prettier.
 
+- `npm test`  
+  Run unit tests once with Vitest.
+
+- `npm run test:watch`  
+  Run tests in watch mode.
+
+- `npm run coverage`  
+  Generate coverage report (v8 provider).
+
+---
+
+## Project Structure
+
+Source code lives under `src/` and follows a simple, predictable layout:
+
+```
+src/
+  assets/               # static internal assets (if any)
+  components/           # UI components (Astro static + React dynamic)
+    ui/                 # Shadcn/ui components
+  db/                   # Supabase clients and types
+  layouts/              # Astro layouts
+  lib/                  # Services and helpers
+    schemas/            # Validation schemas
+    services/           # Domain services (AI, SRS, flashcards)
+  middleware/           # Astro middleware
+  pages/                # Astro pages and API routes
+    api/                # API endpoints
+  styles/               # Global styles
+  test/                 # Test setup utilities
+  types.ts              # Shared types
+```
+
+Additional top-level directories/files:
+
+- `public/` - public assets
+- `supabase/` - local configuration and SQL migrations
+- `.github/workflows/ci.yml` - CI pipeline (tests + build)
+
 ---
 
 ## Testing
 
-This project follows a multi-layer testing strategy. See the full plan in `.ai/test-plan.md`.
+This project follows a multi-layer testing strategy (see `.ai/test-plan.md`).
 
-- **Unit Testing**: business logic, schema validation, utilities, and React components
-  - Tools: `vitest`, `@testing-library/react`, `@testing-library/jest-dom`, `@vitejs/plugin-react`, `happy-dom`/`jsdom`, `vitest-mock-extended`, `zod-mock`
+- **Unit Testing**: business logic, schemas, utilities, React components
+  - Tools: `vitest`, `@testing-library/react`, `@testing-library/jest-dom`, `@vitejs/plugin-react`, `happy-dom`
 - **Integration Testing**: module interactions and external services
-  - Tools: `MSW` (network mocking), `@supabase/supabase-js` mocks, Supabase Local, `Testcontainers`, `Nock`, `@astrojs/test-utils`
-- **Functional/E2E Testing**: end-to-end user flows and requirements
+  - Tools: `MSW`, `@supabase/supabase-js` mocks, Supabase Local, `Testcontainers`, `Nock`, `@astrojs/test-utils`
+- **Functional/E2E Testing**: end-to-end user scenarios (planned)
   - Tools: `Playwright`, `Cucumber`
 - **Coverage**: `v8`/`c8`
 
-Example Vitest config (planned):
+Vitest is configured in `vitest.config.ts` with:
 
-```ts
-// vitest.config.ts
-import { defineConfig } from 'vitest/config'
-import react from '@vitejs/plugin-react'
-import { getViteConfig } from 'astro/config'
+- `happy-dom` environment
+- global assertions
+- setup file: `src/test/setup.ts`
+- alias: `@` -> `./src`
 
-export default defineConfig(
-  getViteConfig({
-    plugins: [react()],
-    test: {
-      globals: true,
-      environment: 'happy-dom',
-      setupFiles: ['./src/test/setup.ts'],
-      coverage: {
-        provider: 'v8',
-        reporter: ['text', 'json', 'html'],
-        exclude: ['node_modules/', 'src/test/']
-      }
-    }
-  })
-)
+Run tests:
+
+```bash
+npm test           # run once
+npm run test:watch # watch mode
+npm run coverage   # coverage report (./coverage)
 ```
 
-Note: Testing tooling and scripts are being introduced incrementally. Refer to the plan in `.ai/test-plan.md` before adding new tests.
+---
+
+## CI
+
+GitHub Actions pipeline runs on pushes and PRs to `master` in `.github/workflows/ci.yml`:
+
+- Install dependencies with `npm ci` (Node 22.x; npm cache enabled)
+- Run unit tests with `npm test`
+- Build production bundle with `npm run build`
+- Upload the `dist/` artifact
 
 ---
 
