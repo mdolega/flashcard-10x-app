@@ -16,26 +16,21 @@ export const DashboardCards: React.FC = () => {
   useEffect(() => {
     const fetchStats = async () => {
       try {
-        const token = localStorage.getItem("sb-access-token");
-        if (!token) {
-          throw new Error("No authentication token found");
-        }
-
         const response = await fetch("/api/flashcards/stats", {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+          credentials: "include", // Include cookies for authentication
         });
 
         if (!response.ok) {
-          throw new Error("Failed to fetch statistics");
+          if (response.status === 401) {
+            throw new Error("Nie jesteś zalogowany");
+          }
+          throw new Error("Nie udało się pobrać statystyk");
         }
 
         const data = await response.json();
         setStats(data);
       } catch (err) {
-        console.error("Error fetching dashboard stats:", err);
-        setError(err instanceof Error ? err.message : "Unknown error");
+        setError(err instanceof Error ? err.message : "Nieznany błąd");
       } finally {
         setLoading(false);
       }

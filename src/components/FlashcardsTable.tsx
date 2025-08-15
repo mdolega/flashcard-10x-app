@@ -20,20 +20,13 @@ export const FlashcardsTable: React.FC<FlashcardsTableProps> = ({ className }) =
   const fetchFlashcards = async (page = 1) => {
     try {
       setLoading(true);
-      const token = localStorage.getItem("sb-access-token");
-      if (!token) {
-        throw new Error("No authentication token found");
-      }
-
       const params = new URLSearchParams({
         page: page.toString(),
         limit: pagination.limit.toString(),
       });
 
       const response = await fetch(`/api/flashcards?${params}`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+        credentials: "include",
       });
 
       if (!response.ok) {

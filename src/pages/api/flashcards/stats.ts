@@ -1,25 +1,20 @@
 import type { APIRoute } from "astro";
+import { FlashcardService } from "../../../lib/services/flashcard.service";
+import { getAuthFromRequest, createUnauthorizedResponse } from "../../../lib/utils/auth";
 
-export const GET: APIRoute = async ({ request }) => {
+export const prerender = false;
+
+export const GET: APIRoute = async ({ request, locals }) => {
   try {
-    // Extract JWT token from Authorization header
-    const authHeader = request.headers.get("Authorization");
-    if (!authHeader || !authHeader.startsWith("Bearer ")) {
-      return new Response(JSON.stringify({ message: "Unauthorized" }), {
-        status: 401,
-        headers: { "Content-Type": "application/json" },
-      });
+    // Check authentication
+    const auth = await getAuthFromRequest(request, locals.supabase);
+    if (!auth) {
+      return createUnauthorizedResponse();
     }
 
-    // For now, return mock statistics
-    // In production, this would query the database with user_id from JWT token
-    // const token = authHeader.substring(7);
-    const stats = {
-      totalFlashcards: 42,
-      pendingReview: 8,
-      studiedToday: 15,
-      accuracy: 85,
-    };
+    // Get statistics from FlashcardService
+    const flashcardService = new FlashcardService();
+    const stats = await flashcardService.getStatistics(auth.user.id);
 
     return new Response(JSON.stringify(stats), {
       status: 200,

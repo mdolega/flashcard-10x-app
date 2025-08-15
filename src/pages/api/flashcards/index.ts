@@ -2,22 +2,16 @@ import type { APIRoute } from "astro";
 import { ZodError } from "zod";
 import { FlashcardService } from "../../../lib/services/flashcard.service";
 import { flashcardQuerySchema, flashcardCreateSchema } from "../../../lib/schemas/flashcard.schema";
+import { getAuthFromRequest, createUnauthorizedResponse } from "../../../lib/utils/auth";
 
 export const prerender = false;
 
-export const GET: APIRoute = async ({ url, locals }) => {
+export const GET: APIRoute = async ({ request, url, locals }) => {
   try {
     // Check authentication
-    const {
-      data: { user },
-      error: authError,
-    } = await locals.supabase.auth.getUser();
-
-    if (authError || !user) {
-      return new Response(JSON.stringify({ message: "Unauthorized" }), {
-        status: 401,
-        headers: { "Content-Type": "application/json" },
-      });
+    const auth = await getAuthFromRequest(request, locals.supabase);
+    if (!auth) {
+      return createUnauthorizedResponse();
     }
 
     // Parse and validate query parameters
@@ -35,7 +29,7 @@ export const GET: APIRoute = async ({ url, locals }) => {
 
     // Get flashcards using service
     const flashcardService = new FlashcardService();
-    const response = await flashcardService.listFlashcards(user.id, validatedParams);
+    const response = await flashcardService.listFlashcards(auth.user.id, validatedParams);
 
     return new Response(JSON.stringify(response), {
       status: 200,
@@ -67,16 +61,9 @@ export const GET: APIRoute = async ({ url, locals }) => {
 export const POST: APIRoute = async ({ request, locals }) => {
   try {
     // Check authentication
-    const {
-      data: { user },
-      error: authError,
-    } = await locals.supabase.auth.getUser();
-
-    if (authError || !user) {
-      return new Response(JSON.stringify({ message: "Unauthorized" }), {
-        status: 401,
-        headers: { "Content-Type": "application/json" },
-      });
+    const auth = await getAuthFromRequest(request, locals.supabase);
+    if (!auth) {
+      return createUnauthorizedResponse();
     }
 
     // Parse and validate request body
@@ -85,7 +72,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
 
     // Create flashcard using service
     const flashcardService = new FlashcardService();
-    const flashcard = await flashcardService.createFlashcard(user.id, validatedData);
+    const flashcard = await flashcardService.createFlashcard(auth.user.id, validatedData);
 
     return new Response(JSON.stringify(flashcard), {
       status: 201,
